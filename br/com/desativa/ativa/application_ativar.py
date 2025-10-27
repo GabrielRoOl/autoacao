@@ -1,22 +1,27 @@
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, StaleElementReferenceException, ElementClickInterceptedException, \
+    NoSuchElementException
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
+from neo4j import GraphDatabase
 
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 
 def ativa():
+    global campo_documento
+    opcoes = Options()
+    opcoes.add_argument("--window-size=1500,1500")
 
     # Inicializa o navegador Chrome
     # O driver deve estar na mesma pasta do script ou no PATH do sistema
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(opcoes)
     driver.get("https://situator.delacroy.com.br/app/manager")
     # Abre a página do Google
-
 
     # Encontra a box de texto com usuário e senha.
     search_box = driver.find_element(By.NAME, "userName")
@@ -64,7 +69,7 @@ def ativa():
                 )
                 # 2. Envia o Cpf do paciente
                 campo_documento.send_keys(cpf)
-                time.sleep(5)
+                time.sleep(6)
                 campo_documento.clear()
                 editar_pessoa = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, "a[title='Editar pessoa']"))
@@ -76,7 +81,7 @@ def ativa():
                 )
                 # 2. Envie o texto da opção desejada diretamente para o elemento.
                 seletor.send_keys("Visitante")
-                time.sleep(2)
+                time.sleep(1)
                 # ALTERA O PERFIL DE ACESSO PARA `VISITANTES VITRIUM`
                 perfil = WebDriverWait(driver, 20).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='type']"))
@@ -90,7 +95,60 @@ def ativa():
 
                 # Use JavaScript para executar o clique
                 driver.execute_script("arguments[0].click();", checkbox_input)
+                time.sleep(1)
+
+                # VARIAVEL COM INPUT APENAS PARA FAZER ALGUMA MUDANÇA INESPERADA
+                conferindo_dados = input("Precisa de alguma mudança? ")
+
+
+
+                # MUDA PARA A PARTE 2
+                muda_para_unidades = WebDriverWait(driver, 20).until(
+                    EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
+                )
+                muda_para_unidades.click()
+                time.sleep(1)
+
+                # CLICA EM 'ASSOCIAR UNIDADE'
+                botao_associar_unidade = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Associar unidade"))
+                )
+                botao_associar_unidade.click()
                 time.sleep(2)
+
+                # INSERE TEXTO NO CAMPO 'PESQUISAR' DA UNIDADE
+                campo_pesquisar_unidade = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='filters.search']"))
+                )
+
+                print("Qual o número da sala? ")
+                local = input()
+                if local != "0":
+                    campo_pesquisar_unidade.send_keys(local)
+                    time.sleep(1)
+
+                    # MARCA O CHECKBOX DA UNIDADE (Alternativa com JS)
+                    checkbox_unidade = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "checkAtivo0"))
+                    )
+                    driver.execute_script("arguments[0].click();", checkbox_unidade)
+                    time.sleep(1)
+
+                    # CLICA NO BOTÃO 'SALVAR' DO MODAL DE UNIDADES
+                    botao_salvar_modal_unidade = WebDriverWait(driver, 10).until(
+                        EC.element_to_be_clickable((By.CSS_SELECTOR, "div.button-modal button[type='submit']"))
+                    )
+                    botao_salvar_modal_unidade.click()
+                    time.sleep(1)
+
+                else:
+                    # CLICA NO 'X' PARA FECHAR O MODAL
+                    botao_fechar_x_modal = WebDriverWait(driver, 10).until(
+                        EC.element_to_be_clickable(
+                            (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeClick();']"))
+                    )
+                    botao_fechar_x_modal.click()
+                    time.sleep(1)
 
                 # MUDA PARA A PARTE 4
                 salve_clone = WebDriverWait(driver, 20).until(
@@ -117,11 +175,18 @@ def ativa():
                     EC.element_to_be_clickable((By.NAME, "save"))
                 )
                 salve.click()
-                time.sleep(1)
             except TimeoutException:
                 campo_documento.clear()
 
                 continue
+            except StaleElementReferenceException:
+                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n ===============================\n")
+            except ElementClickInterceptedException:
+                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n ===============================\n")
+            except NoSuchElementException:
+                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n ===============================\n")
+
+
     finally:
         # Fecha o navegador
         driver.quit()
