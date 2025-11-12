@@ -107,14 +107,14 @@ def ativa():
                     EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
                 )
                 muda_para_unidades.click()
-                time.sleep(1)
+                time.sleep(0.5)
 
                 # CLICA EM 'ASSOCIAR UNIDADE'
                 botao_associar_unidade = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Associar unidade"))
                 )
                 botao_associar_unidade.click()
-                time.sleep(2)
+                time.sleep(0.5)
 
                 # INSERE TEXTO NO CAMPO 'PESQUISAR' DA UNIDADE
                 campo_pesquisar_unidade = WebDriverWait(driver, 10).until(
@@ -123,8 +123,13 @@ def ativa():
 
                 print("Qual o número da sala? ")
                 local = input()
-                if local != "0":
-                    campo_pesquisar_unidade.send_keys(local)
+                if local != "0" and local != "":
+                    campo_pesquisar_unidade.clear()
+
+                    for caractere in local:
+                        campo_pesquisar_unidade.send_keys(caractere)
+                        time.sleep(0.05)
+
                     time.sleep(1)
 
                     # MARCA O CHECKBOX DA UNIDADE (Alternativa com JS)
@@ -175,12 +180,21 @@ def ativa():
                     EC.element_to_be_clickable((By.NAME, "save"))
                 )
                 salve.click()
+
+                # CLICA NO 'X' PARA FECHAR O MODAL FINAL
+                botao_fechar_x_final = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable(
+                        (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeModal();']"))
+                )
+                time.sleep(2)
+                botao_fechar_x_final.click()
+
             except TimeoutException:
                 campo_documento.clear()
 
                 continue
             except StaleElementReferenceException:
-                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n ===============================\n")
+                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n   ===============================\n")
             except ElementClickInterceptedException:
                 print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n ===============================\n")
             except NoSuchElementException:
