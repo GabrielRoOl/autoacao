@@ -86,11 +86,12 @@ def ativa():
                             (By.XPATH, "//*[contains(text(), 'Nenhum registro encontrado.')]")
                         )
                     )
+
                     campo_documento.clear()
                     botao_cadastrar = driver.find_element(By.XPATH, "//button[contains(text(), 'Cadastrar pessoa')]")
                     botao_cadastrar.click()
                     time.sleep(0.5)
-                    nome = input("Digite o nome: ")
+                    nome = input("Digite o nome: ").upper()
                     campo_cpf = driver.find_element(By.XPATH, "//input[@id='personCpf']")
                     campo_cpf.send_keys(cpf)
                     # ALTERA O PERFIL DE ACESSO PARA `VITRIUM SUB B`
@@ -104,93 +105,18 @@ def ativa():
                     # VARIAVEL COM INPUT APENAS PARA FAZER ALGUMA MUDANÇA INESPERADA
                     conferindo_dados = input("Precisa de alguma mudança? ")
 
-                    # MUDA PARA A PARTE 2
-                    muda_para_unidades = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
-                    )
-                    muda_para_unidades.click()
-                    time.sleep(0.5)
+                    if conferindo_dados == "n" or conferindo_dados == "N" or conferindo_dados == "0":
+                        last_part_save(driver)
+                        continue
 
-                    # CLICA EM 'ASSOCIAR UNIDADE'
-                    botao_associar_unidade = WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Associar unidade"))
-                    )
-                    botao_associar_unidade.click()
-                    time.sleep(0.5)
+                    unidades_associar_unidade(driver)
 
-                    # INSERE TEXTO NO CAMPO 'PESQUISAR' DA UNIDADE
-                    campo_pesquisar_unidade = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='filters.search']"))
-                    )
+                    authorization(driver)
 
-                    print("Qual o número da sala? ")
-                    local = input()
-                    if local != "0" and local != "":
-                        campo_pesquisar_unidade.clear()
+                    last_part_save(driver)
 
-                        for caractere in local:
-                            campo_pesquisar_unidade.send_keys(caractere)
-                            time.sleep(0.05)
-
-                        time.sleep(1)
-
-                        # MARCA O CHECKBOX DA UNIDADE (Alternativa com JS)
-                        checkbox_unidade = WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.ID, "checkAtivo0"))
-                        )
-                        driver.execute_script("arguments[0].click();", checkbox_unidade)
-                        time.sleep(1)
-
-                        # CLICA NO BOTÃO 'SALVAR' DO MODAL DE UNIDADES
-                        botao_salvar_modal_unidade = WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.button-modal button[type='submit']"))
-                        )
-                        botao_salvar_modal_unidade.click()
-                        time.sleep(1)
-
-                    else:
-                        # CLICA NO 'X' PARA FECHAR O MODAL
-                        botao_fechar_x_modal = WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeClick();']"))
-                        )
-                        botao_fechar_x_modal.click()
-                        time.sleep(1)
-
-                    # MUDA PARA A PARTE 4
-                    salve_clone = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[text()='4']"))
-                    )
-                    salve_clone.click()
-
-                    # ALTERA A PERMISSÃO DE ACESSO
-                    # 1. Encontre o elemento <select> pelo seu atributo 'ng-model'
-                    seletor_permissao = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located(
-                            (By.CSS_SELECTOR, "select[ng-model='wizard.person.accessPermission']"))
-                    )
-
-                    # 2. Envie o texto da opção desejada ("Autorizado") diretamente para o elemento
-                    seletor_permissao.send_keys("Autorizado")
-
-                    # MUDA PARA A PARTE 6 E SALVA
-                    salve_clone = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[text()='6']"))
-                    )
-                    salve_clone.click()
-                    salve = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.NAME, "save"))
-                    )
-                    salve.click()
-
-                    # CLICA NO 'X' PARA FECHAR O MODAL FINAL
-                    botao_fechar_x_final = WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable(
-                            (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeModal();']"))
-                    )
-                    time.sleep(2)
-                    botao_fechar_x_final.click()
                 except:
+                    time.sleep(2)
                     editar_pessoa = WebDriverWait(driver, 10).until(
                         EC.element_to_be_clickable((By.CSS_SELECTOR, "a[title='Editar pessoa']"))
                     )
@@ -216,7 +142,7 @@ def ativa():
                         EC.presence_of_element_located((By.ID, "checkAtivo"))
                     )
                     if checkbox_input.is_selected():
-                        print("✅")
+                        print("")
                     else:
                         # Use JavaScript para executar o clique
                         driver.execute_script("arguments[0].click();", checkbox_input)
@@ -225,110 +151,77 @@ def ativa():
                     # VARIAVEL COM INPUT APENAS PARA FAZER ALGUMA MUDANÇA INESPERADA
                     conferindo_dados = input("Precisa de alguma mudança? ")
 
+                    if conferindo_dados == "n" or conferindo_dados == "N" or conferindo_dados == "0":
+                        last_part_save(driver)
+                        continue
 
 
-                    # MUDA PARA A PARTE 2
-                    muda_para_unidades = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
-                    )
-                    muda_para_unidades.click()
-                    time.sleep(0.5)
+                    unidades_associar_unidade(driver)
 
-                    # CLICA EM 'ASSOCIAR UNIDADE'
-                    botao_associar_unidade = WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Associar unidade"))
-                    )
-                    botao_associar_unidade.click()
-                    time.sleep(0.5)
+                    # MUDA PARA PARTE 4, ACESSO, PERMISSÃO DE ACESSO
+                    authorization(driver)
 
-                    # INSERE TEXTO NO CAMPO 'PESQUISAR' DA UNIDADE
-                    campo_pesquisar_unidade = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='filters.search']"))
-                    )
 
-                    print("Qual o número da sala? ")
-                    local = input()
-                    if local != "0" and local != "":
-                        campo_pesquisar_unidade.clear()
+                    # MUDA PARA PARTE 6, SALVA E FECHA
+                    last_part_save(driver)
 
-                        for caractere in local:
-                            campo_pesquisar_unidade.send_keys(caractere)
-                            time.sleep(0.05)
 
-                        time.sleep(1)
 
-                        # MARCA O CHECKBOX DA UNIDADE (Alternativa com JS)
-                        checkbox_unidade = WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.ID, "checkAtivo0"))
-                        )
-                        driver.execute_script("arguments[0].click();", checkbox_unidade)
-                        time.sleep(1)
-
-                        # CLICA NO BOTÃO 'SALVAR' DO MODAL DE UNIDADES
-                        botao_salvar_modal_unidade = WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.button-modal button[type='submit']"))
-                        )
-                        botao_salvar_modal_unidade.click()
-                        time.sleep(1)
-
-                    else:
-                        # CLICA NO 'X' PARA FECHAR O MODAL
-                        botao_fechar_x_modal = WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeClick();']"))
-                        )
-                        botao_fechar_x_modal.click()
-                        time.sleep(1)
-
-                    # MUDA PARA A PARTE 4
-                    salve_clone = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[text()='4']"))
-                    )
-                    salve_clone.click()
-
-                    # ALTERA A PERMISSÃO DE ACESSO
-                    # 1. Encontre o elemento <select> pelo seu atributo 'ng-model'
-                    seletor_permissao = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located(
-                            (By.CSS_SELECTOR, "select[ng-model='wizard.person.accessPermission']"))
-                    )
-
-                    # 2. Envie o texto da opção desejada ("Autorizado") diretamente para o elemento
-                    seletor_permissao.send_keys("Autorizado")
-
-                    # MUDA PARA A PARTE 6 E SALVA
-                    salve_clone = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.XPATH, "//span[text()='6']"))
-                    )
-                    salve_clone.click()
-                    salve = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.NAME, "save"))
-                    )
-                    salve.click()
-
-                    # CLICA NO 'X' PARA FECHAR O MODAL FINAL
-                    botao_fechar_x_final = WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable(
-                            (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeModal();']"))
-                    )
-                    time.sleep(2)
-                    botao_fechar_x_final.click()
 
             except TimeoutException:
                 campo_documento.clear()
 
                 continue
             except StaleElementReferenceException:
-                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n   ===============================\n")
+                print("""================================================================\n  ❌❌❌ 1° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n================================================================""")
             except ElementClickInterceptedException:
-                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n ===============================\n")
+                print("""================================================================\n  ❌❌❌ 2° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n================================================================""")
             except NoSuchElementException:
-                print("\n===============================\n   HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE \n ===============================\n")
+                print("""================================================================\n  ❌❌❌ 3° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n================================================================""")
+
 
 
     finally:
         # Fecha o navegador
         driver.quit()
+
+def authorization(driver):
+    # MUDA PARA A PARTE 4
+    salve_clone = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//span[text()='4']"))
+    )
+    salve_clone.click()
+
+    # ALTERA A PERMISSÃO DE ACESSO
+    # 1. Encontre o elemento <select> pelo seu atributo 'ng-model'
+    seletor_permissao = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(
+            (By.CSS_SELECTOR, "select[ng-model='wizard.person.accessPermission']"))
+    )
+
+    # 2. Envie o texto da opção desejada ("Autorizado") diretamente para o elemento
+    seletor_permissao.send_keys("Autorizado")
+
+def last_part_save(driver):
+    # MUDA PARA A PARTE 6 E SALVA
+    salve_clone = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//span[text()='6']"))
+    )
+    salve_clone.click()
+    salve = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.NAME, "save"))
+    )
+    salve.click()
+
+    # CLICA NO 'X' PARA FECHAR O MODAL FINAL
+    botao_fechar_x_final = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeModal();']"))
+    )
+    time.sleep(2)
+    botao_fechar_x_final.click()
+    print("Finalizado com sucesso!✅")
+
 
 
 def validar_cpf(cpf):
@@ -362,6 +255,60 @@ def validar_cpf(cpf):
 
     # Verifica se os dígitos verificadores calculados são iguais aos fornecidos
     return cpf[-2:] == f"{digito_1}{digito_2}"
+
+def unidades_associar_unidade(driver):
+    # MUDA PARA A PARTE 2
+    muda_para_unidades = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
+    )
+    muda_para_unidades.click()
+    time.sleep(0.5)
+
+    # CLICA EM 'ASSOCIAR UNIDADE'
+    botao_associar_unidade = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Associar unidade"))
+    )
+    botao_associar_unidade.click()
+    time.sleep(0.5)
+
+    # INSERE TEXTO NO CAMPO 'PESQUISAR' DA UNIDADE
+    campo_pesquisar_unidade = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='filters.search']"))
+    )
+
+    local = input("Qual o número da sala? ")
+
+    if local != "0" and local != "":
+        campo_pesquisar_unidade.clear()
+
+        for caractere in local:
+            campo_pesquisar_unidade.send_keys(caractere)
+            time.sleep(0.05)
+
+        time.sleep(1)
+
+        # MARCA O CHECKBOX DA UNIDADE (Alternativa com JS)
+        checkbox_unidade = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "checkAtivo0"))
+        )
+        driver.execute_script("arguments[0].click();", checkbox_unidade)
+        time.sleep(1)
+
+        # CLICA NO BOTÃO 'SALVAR' DO MODAL DE UNIDADES
+        botao_salvar_modal_unidade = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.button-modal button[type='submit']"))
+        )
+        botao_salvar_modal_unidade.click()
+        time.sleep(1)
+
+    else:
+        # CLICA NO 'X' PARA FECHAR O MODAL
+        botao_fechar_x_modal = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeClick();']"))
+        )
+        botao_fechar_x_modal.click()
+        time.sleep(1)
 
 
 # Executa o programa
