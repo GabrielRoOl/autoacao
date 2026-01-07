@@ -13,6 +13,7 @@ from neo4j import GraphDatabase
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
+PERFIL_ACESSO_MORADOR="Morador"
 
 def ativa():
     global campo_documento
@@ -128,25 +129,15 @@ def ativa():
                     seletor = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='personType']"))
                     )
-                    # 2. Envie o texto da opção desejada diretamente para o elemento.
                     time.sleep(1)
-                    seletor.send_keys("Morador")
+                    seletor.send_keys(PERFIL_ACESSO_MORADOR)
                     # ALTERA O PERFIL DE ACESSO PARA `VISITANTES VITRIUM`
                     perfil = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='type']"))
                     )
                     perfil.send_keys("VITRIUM SUB B")
 
-                    # CLICA NO BOTÃO DE ATIVO
-                    checkbox_input = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.ID, "checkAtivo"))
-                    )
-                    if checkbox_input.is_selected():
-                        print("")
-                    else:
-                        # Use JavaScript para executar o clique
-                        driver.execute_script("arguments[0].click();", checkbox_input)
-                        time.sleep(1)
+                    botao_ativacao(driver)
 
                     # VARIAVEL COM INPUT APENAS PARA FAZER ALGUMA MUDANÇA INESPERADA
                     conferindo_dados = input("Precisa de alguma mudança? ")
@@ -173,11 +164,11 @@ def ativa():
 
                 continue
             except StaleElementReferenceException:
-                print("""================================================================\n  ❌❌❌ 1° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n================================================================""")
+                print("""===================================================================\n  ❌❌❌ 1° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n===================================================================""")
             except ElementClickInterceptedException:
-                print("""================================================================\n  ❌❌❌ 2° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n================================================================""")
+                print("""===================================================================\n  ❌❌❌ 2° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n===================================================================""")
             except NoSuchElementException:
-                print("""================================================================\n  ❌❌❌ 3° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n================================================================""")
+                print("""===================================================================\n  ❌❌❌ 3° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n===================================================================""")
 
 
 
@@ -221,6 +212,18 @@ def last_part_save(driver):
     time.sleep(2)
     botao_fechar_x_final.click()
     print("Finalizado com sucesso!✅")
+
+# CLICA NO BOTÃO DE ATIVO
+def botao_ativacao(driver):
+    checkbox_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "checkAtivo"))
+    )
+    if checkbox_input.is_selected():
+        print("")
+    else:
+        # Use JavaScript para executar o clique
+        driver.execute_script("arguments[0].click();", checkbox_input)
+        time.sleep(1)
 
 
 

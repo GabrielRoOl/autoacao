@@ -63,6 +63,8 @@ def automacao_remove():
 
                 )
                 nome_paciente.send_keys(procurar_pessoa)
+
+                # BOTÃO DE EDITAR PESSOA
                 xpath_do_botao = "//tr[./td[text()='" + procurar_pessoa + "']]//a[@title='Editar pessoa']"
                 wait = WebDriverWait(driver, 10)
                 botao_editar = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_do_botao)))
@@ -73,7 +75,6 @@ def automacao_remove():
                 seletor = WebDriverWait(driver, 20).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='personType']"))
                 )
-                # 2. Envie o texto da opção desejada diretamente para o elemento.
                 seletor.send_keys("Visitante")
 
                 # ALTERA O PERFIL DE ACESSO PARA `VISITANTES VITRIUM`
