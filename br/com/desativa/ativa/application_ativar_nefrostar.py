@@ -14,8 +14,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from br.com.desativa.ativa.application_ativar import botao_ativacao
 
-PERFIL_ACESSO_MORADOR="Morador"
-
 def ativa():
 
     driver = initialize_start()
@@ -24,8 +22,9 @@ def ativa():
 
         status_filtro = "Inativos"
         sala = "0217"
+        tipo = "Visitante"
 
-        page_pessoas(driver, status_filtro, sala)
+        page_pessoas(driver, status_filtro, sala, tipo)
 
         while True:
 
@@ -225,7 +224,7 @@ def editar_pessoa(driver):
     time.sleep(1)
 
 
-def page_pessoas(driver, status_filter, sala):
+def page_pessoas(driver, status_filter, sala, tipo):
     # NA PAGINA PRINCIPAL
     # VAI PARA A PARTE DE CADASTRO - Pessoas
     wait = WebDriverWait(driver, 10)
@@ -252,7 +251,7 @@ def page_pessoas(driver, status_filter, sala):
         EC.presence_of_element_located((By.CSS_SELECTOR, "select[ng-model='pagination.filters.personType']"))
     )
     select_objeto = Select(seleciona_tipo)
-    select_objeto.select_by_visible_text("Visitante")
+    select_objeto.select_by_visible_text(tipo)
     time.sleep(1)
 
 
