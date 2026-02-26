@@ -115,8 +115,8 @@ def ativa():
 
                     if conferindo_dados == "0141" or conferindo_dados == "0217" or conferindo_dados == "0305":
                         adiciona_departamento(driver, conferindo_dados)
+                        unidades_associar_unidade(driver, conferindo_dados)
 
-                    unidades_associar_unidade(driver)
 
                     authorization(driver)
 
@@ -152,8 +152,9 @@ def ativa():
                         last_part_save(driver)
                         continue
 
-
-                    unidades_associar_unidade(driver)
+                    if conferindo_dados == "0141" or conferindo_dados == "0217" or conferindo_dados == "0305":
+                        adiciona_departamento(driver, conferindo_dados)
+                        unidades_associar_unidade(driver, conferindo_dados)
 
                     # MUDA PARA PARTE 4, ACESSO, PERMISSÃO DE ACESSO
                     authorization(driver)
@@ -169,12 +170,6 @@ def ativa():
                 campo_documento.clear()
 
                 continue
-            except StaleElementReferenceException:
-                print("""===================================================================\n  ❌❌❌ 1° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n===================================================================""")
-            except ElementClickInterceptedException:
-                print("""===================================================================\n  ❌❌❌ 2° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n===================================================================""")
-            except NoSuchElementException:
-                print("""===================================================================\n  ❌❌❌ 3° HOUVE ALGUM ERRO, FAÇA O PROCESSO MANUALMENTE ❌❌❌  \n===================================================================""")
 
 
 
@@ -265,59 +260,71 @@ def validar_cpf(cpf):
     # Verifica se os dígitos verificadores calculados são iguais aos fornecidos
     return cpf[-2:] == f"{digito_1}{digito_2}"
 
-def unidades_associar_unidade(driver, ):
-    # MUDA PARA A PARTE 2
-    muda_para_unidades = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
-    )
-    muda_para_unidades.click()
-    time.sleep(0.5)
-
-    # CLICA EM 'ASSOCIAR UNIDADE'
-    botao_associar_unidade = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Associar unidade"))
-    )
-    botao_associar_unidade.click()
-    time.sleep(0.5)
-
-    # INSERE TEXTO NO CAMPO 'PESQUISAR' DA UNIDADE
-    campo_pesquisar_unidade = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='filters.search']"))
-    )
-
-    local = input("Qual o número da sala? ")
-
-    if local != "0" and local != "":
-        campo_pesquisar_unidade.clear()
-
-        for caractere in local:
-            campo_pesquisar_unidade.send_keys(caractere)
-            time.sleep(0.05)
-
-        time.sleep(1)
-
-        # MARCA O CHECKBOX DA UNIDADE (Alternativa com JS)
-        checkbox_unidade = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "checkAtivo0"))
+def unidades_associar_unidade(driver, numero_sala):
+    try:
+        # MUDA PARA A PARTE 2
+        muda_para_unidades = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
         )
-        driver.execute_script("arguments[0].click();", checkbox_unidade)
-        time.sleep(1)
+        muda_para_unidades.click()
+        time.sleep(0.5)
 
-        # CLICA NO BOTÃO 'SALVAR' DO MODAL DE UNIDADES
-        botao_salvar_modal_unidade = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.button-modal button[type='submit']"))
+        # CLICA EM 'ASSOCIAR UNIDADE'
+        botao_associar_unidade = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Associar unidade"))
         )
-        botao_salvar_modal_unidade.click()
-        time.sleep(1)
+        botao_associar_unidade.click()
+        time.sleep(0.5)
 
-    else:
-        # CLICA NO 'X' PARA FECHAR O MODAL
-        botao_fechar_x_modal = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable(
-                (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeClick();']"))
+        # INSERE TEXTO NO CAMPO 'PESQUISAR' DA UNIDADE
+        campo_pesquisar_unidade = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='filters.search']"))
         )
-        botao_fechar_x_modal.click()
-        time.sleep(1)
+
+        local = numero_sala
+
+        if local != "0" and local != "":
+            campo_pesquisar_unidade.clear()
+
+            for caractere in local:
+                campo_pesquisar_unidade.send_keys(caractere)
+                time.sleep(0.05)
+
+            time.sleep(1)
+
+            try:
+                # MARCA O CHECKBOX DA UNIDADE
+                checkbox_unidade = WebDriverWait(driver, 2).until(
+                    EC.presence_of_element_located((By.ID, "checkAtivo0"))
+                )
+                driver.execute_script("arguments[0].click();", checkbox_unidade)
+                time.sleep(1)
+
+                # CLICA NO BOTÃO 'SALVAR' DO MODAL DE UNIDADES
+                botao_salvar_modal_unidade = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "div.button-modal button[type='submit']"))
+                )
+                botao_salvar_modal_unidade.click()
+                time.sleep(1)
+            except:
+                # CLICA NO 'X' PARA FECHAR O MODAL
+                botao_fechar_x_modal = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable(
+                        (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeClick();']"))
+                )
+                botao_fechar_x_modal.click()
+                time.sleep(1)
+
+        else:
+            # CLICA NO 'X' PARA FECHAR O MODAL
+            botao_fechar_x_modal = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeClick();']"))
+            )
+            botao_fechar_x_modal.click()
+            time.sleep(1)
+    except:
+        print("ERRO AO ASSOCIAR UNIDADE")
 
 def adiciona_departamento(driver, conferindo_dados):
     inserir_departamento = ""
@@ -332,6 +339,7 @@ def adiciona_departamento(driver, conferindo_dados):
         departamento = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='wizard.person.department']"))
         )
+        departamento.clear()
         departamento.send_keys(inserir_departamento)
         time.sleep(1)
     except:
