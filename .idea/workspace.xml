@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="86411a20-e6db-4201-89a2-ff145549e04a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/br/com/desativa/ativa/application_ativar.py" beforeDir="false" afterPath="$PROJECT_DIR$/br/com/desativa/ativa/application_ativar.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/br/com/desativa/ativa/application_ativar_nefrostar.py" beforeDir="false" afterPath="$PROJECT_DIR$/br/com/desativa/ativa/application_ativar_nefrostar.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

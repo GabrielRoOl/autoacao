@@ -8,7 +8,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
-from neo4j import GraphDatabase
 
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
@@ -65,7 +64,8 @@ def ativa():
             try:
                 # SELECIONA O NOME DA PESSOA E ABRE O REGISTRO
                 print("Qual o CPF da pessoa que deseja ativar o acesso?")
-                cpf = input() #
+                cpf = input()
+
                 while True:
                     if not validar_cpf(cpf):
                         cpf = input("CPF invalido, digite novamente: ")
@@ -81,12 +81,13 @@ def ativa():
                 )
                 # 2. Envia o Cpf do paciente
                 campo_documento.send_keys(cpf)
-                try:
-                    mensagem = WebDriverWait(driver, 5).until(
-                        EC.visibility_of_element_located(
-                            (By.XPATH, "//*[contains(text(), 'Nenhum registro encontrado.')]")
-                        )
-                    )
+
+                time.sleep(2)
+
+                print("0 novo")
+                teste_espera = input()
+                
+                if teste_espera == "0":
 
                     campo_documento.clear()
                     botao_cadastrar = driver.find_element(By.XPATH, "//button[contains(text(), 'Cadastrar pessoa')]")
@@ -103,6 +104,8 @@ def ativa():
                     campo_nome = driver.find_element(By.XPATH, "//input[@id='personName']")
                     campo_nome.send_keys(nome)
 
+                    tirar_foto(driver)
+
                     # VARIAVEL COM INPUT APENAS PARA FAZER ALGUMA MUDANÇA INESPERADA
                     conferindo_dados = input("Precisa de alguma mudança? ")
 
@@ -110,14 +113,17 @@ def ativa():
                         last_part_save(driver)
                         continue
 
+                    if conferindo_dados == "0141" or conferindo_dados == "0217" or conferindo_dados == "0305":
+                        adiciona_departamento(driver, conferindo_dados)
+
                     unidades_associar_unidade(driver)
 
                     authorization(driver)
 
                     last_part_save(driver)
 
-                except:
-                    time.sleep(2)
+                else:
+
                     editar_pessoa = WebDriverWait(driver, 10).until(
                         EC.element_to_be_clickable((By.CSS_SELECTOR, "a[title='Editar pessoa']"))
                     )
@@ -259,7 +265,7 @@ def validar_cpf(cpf):
     # Verifica se os dígitos verificadores calculados são iguais aos fornecidos
     return cpf[-2:] == f"{digito_1}{digito_2}"
 
-def unidades_associar_unidade(driver):
+def unidades_associar_unidade(driver, ):
     # MUDA PARA A PARTE 2
     muda_para_unidades = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.XPATH, "//span[text()='2']"))
@@ -312,6 +318,33 @@ def unidades_associar_unidade(driver):
         )
         botao_fechar_x_modal.click()
         time.sleep(1)
+
+def adiciona_departamento(driver, conferindo_dados):
+    inserir_departamento = ""
+    if conferindo_dados == "0141":
+        inserir_departamento = "SALA B 0141 - SIRIO LIBANÊS"
+    if conferindo_dados == "0217":
+        inserir_departamento = "SALA B 0217 - NEFROSTAR"
+    if conferindo_dados == "0305":
+        inserir_departamento = "SALA B 0305 - MED SPA/ C PLASTICA / INFINITY / LESSENCE CLINIC"
+
+    try:
+        departamento = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input[ng-model='wizard.person.department']"))
+        )
+        departamento.send_keys(inserir_departamento)
+        time.sleep(1)
+    except:
+        print("ERRO AO TENTAR INSERIR DEPARTAMENTO")
+
+def tirar_foto(driver):
+    try:
+        botao_webcam = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "button[ng-click='webcamClick()']"))
+        )
+        botao_webcam.click()
+    except:
+        print("ERRO AO TENTAR TIRAR FOTO")
 
 
 # Executa o programa

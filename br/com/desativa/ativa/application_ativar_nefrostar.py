@@ -12,7 +12,7 @@ import time
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-from br.com.desativa.ativa.application_ativar import botao_ativacao
+from br.com.sistema.ativa.application_ativar import botao_ativacao
 
 def ativa():
 
