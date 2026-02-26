@@ -152,7 +152,7 @@ def ativa():
                         last_part_save(driver)
                         continue
 
-                    if conferindo_dados == "0141" or conferindo_dados == "0217" or conferindo_dados == "0305":
+                    if conferindo_dados == "0141" or conferindo_dados == "0217" or conferindo_dados == "0305" or conferindo_dados == "-25":
                         adiciona_departamento(driver, conferindo_dados)
                         unidades_associar_unidade(driver, conferindo_dados)
 
@@ -328,6 +328,8 @@ def unidades_associar_unidade(driver, numero_sala):
 
 def adiciona_departamento(driver, conferindo_dados):
     inserir_departamento = ""
+    if conferindo_dados == "-25":
+        inserir_departamento = "SALA S-25 - ICB Instituto de Cataratas de Brasília"
     if conferindo_dados == "0141":
         inserir_departamento = "SALA B 0141 - SIRIO LIBANÊS"
     if conferindo_dados == "0217":
