@@ -10,6 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
+from br.com.desativa.ativa.PerfilDeAcesso import descobrir_perfil
+
 PERFIL_ACESSO_MORADOR = "Morador"
 
 
@@ -91,13 +93,18 @@ def ativa():
                     botao_cadastrar.click()
                     time.sleep(0.5)
                     nome = input("Digite o nome: ").upper()
+                    primeira_letra_do_nome = nome[0]
+
+                    perfil_selecionado = descobrir_perfil(primeira_letra_do_nome)
+                    print(perfil_selecionado)
+
                     campo_cpf = driver.find_element(By.XPATH, "//input[@id='personCpf']")
                     campo_cpf.send_keys(cpf)
-                    # ALTERA O PERFIL DE ACESSO PARA `VITRIUM SUB B`
+                    # ALTERA O PERFIL DE ACESSO DINAMICAMENTE DEPEMDENDO DA PRIMEIRA LETRA DO NOME
                     perfil = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='type']"))
                     )
-                    perfil.send_keys("VITRIUM SUB B")
+                    perfil.send_keys(perfil_selecionado)
                     campo_nome = driver.find_element(By.XPATH, "//input[@id='personName']")
                     campo_nome.send_keys(nome)
 
@@ -127,17 +134,26 @@ def ativa():
 
                     campo_documento.clear()
                     time.sleep(1.5)
-                    # ALTERA O TIPO PARA VISITANTE
+                    # ALTERA O TIPO PARA MORADOR
                     seletor = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='personType']"))
                     )
                     time.sleep(1)
                     seletor.send_keys(PERFIL_ACESSO_MORADOR)
-                    # ALTERA O PERFIL DE ACESSO PARA `VISITANTES VITRIUM`
+
+                    campo_nome = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "personName"))
+                    )
+                    nome_cadastrado = campo_nome.get_attribute("value").strip()
+                    print(f"Nome encontrado no cadastro: {nome_cadastrado}")
+                    primeira_letra_do_nome = nome_cadastrado[0]
+
+                    perfil_selecionado = descobrir_perfil(primeira_letra_do_nome)
+
                     perfil = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='type']"))
                     )
-                    perfil.send_keys("VITRIUM SUB B")
+                    perfil.send_keys(perfil_selecionado)
 
                     botao_ativacao(driver)
 
