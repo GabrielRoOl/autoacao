@@ -10,7 +10,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-PERFIL_ACESSO_MORADOR = "Morador"
+TIPO = "Morador"
+PERMISSAO_ACESSO = "Autorizado"
+PERFIL_ACESSO = "VITRIUM SUB B"
+STATUS = "Todos"
 
 
 def ativa():
@@ -55,7 +58,7 @@ def ativa():
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.people-filter select"))
         )
         tipo = Select(seleciona_morador)
-        tipo.select_by_visible_text("Todos")
+        tipo.select_by_visible_text(STATUS)
         time.sleep(1)
 
         while True:
@@ -63,6 +66,9 @@ def ativa():
                 # SELECIONA O NOME DA PESSOA E ABRE O REGISTRO
                 print("Qual o CPF da pessoa que deseja ativar o acesso?")
                 cpf = input()
+
+                if cpf == "clear":
+                    limpeza_terminal()
 
                 while True:
                     if not validar_cpf(cpf):
@@ -97,7 +103,7 @@ def ativa():
                     perfil = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='type']"))
                     )
-                    perfil.send_keys("VITRIUM SUB B")
+                    perfil.send_keys(PERFIL_ACESSO)
                     campo_nome = driver.find_element(By.XPATH, "//input[@id='personName']")
                     campo_nome.send_keys(nome)
 
@@ -127,17 +133,22 @@ def ativa():
 
                     campo_documento.clear()
                     time.sleep(1.5)
+
                     # ALTERA O TIPO PARA VISITANTE
                     seletor = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='personType']"))
                     )
                     time.sleep(1)
-                    seletor.send_keys(PERFIL_ACESSO_MORADOR)
-                    # ALTERA O PERFIL DE ACESSO PARA `VISITANTES VITRIUM`
+                    seletor.send_keys(TIPO)
+
+                    # Altera o nome do cadastro para maiusculo se tiver algum caracter minusculo
+                    altera_para_maiusculo(driver)
+
+                    # ALTERA O PERFIL DE ACESSO PARA `VITRIUM SUB B`
                     perfil = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, "select[name='type']"))
                     )
-                    perfil.send_keys("VITRIUM SUB B")
+                    perfil.send_keys(PERFIL_ACESSO)
 
                     botao_ativacao(driver)
 
@@ -159,14 +170,10 @@ def ativa():
                     last_part_save(driver)
 
 
-
-
             except TimeoutException:
                 campo_documento.clear()
 
                 continue
-
-
 
     finally:
         # Fecha o navegador
@@ -174,42 +181,48 @@ def ativa():
 
 
 def authorization(driver):
-    # MUDA PARA A PARTE 4
-    salve_clone = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//span[text()='4']"))
-    )
-    salve_clone.click()
+    try:
+        # MUDA PARA A PARTE 4
+        salve_clone = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//span[text()='4']"))
+        )
+        salve_clone.click()
 
-    # ALTERA A PERMISSÃO DE ACESSO
-    # 1. Encontre o elemento <select> pelo seu atributo 'ng-model'
-    seletor_permissao = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "select[ng-model='wizard.person.accessPermission']"))
-    )
+        # ALTERA A PERMISSÃO DE ACESSO
+        # 1. Encontre o elemento <select> pelo seu atributo 'ng-model'
+        seletor_permissao = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "select[ng-model='wizard.person.accessPermission']"))
+        )
 
-    # 2. Envie o texto da opção desejada ("Autorizado") diretamente para o elemento
-    seletor_permissao.send_keys("Autorizado")
+        # 2. Envie o texto da opção desejada ("Autorizado") diretamente para o elemento
+        seletor_permissao.send_keys(PERMISSAO_ACESSO)
+    except:
+        print("ERRO AO AUTORIZAR PERFIL")
 
 
 def last_part_save(driver):
-    # MUDA PARA A PARTE 6 E SALVA
-    salve_clone = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//span[text()='6']"))
-    )
-    salve_clone.click()
-    salve = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.NAME, "save"))
-    )
-    salve.click()
+    try:
+        # MUDA PARA A PARTE 6 E SALVA
+        salve_clone = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//span[text()='6']"))
+        )
+        salve_clone.click()
+        salve = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.NAME, "save"))
+        )
+        salve.click()
 
-    # CLICA NO 'X' PARA FECHAR O MODAL FINAL
-    botao_fechar_x_final = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeModal();']"))
-    )
-    time.sleep(2)
-    botao_fechar_x_final.click()
-    print("Finalizado com sucesso!✅")
+        # CLICA NO 'X' PARA FECHAR O MODAL FINAL
+        botao_fechar_x_final = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, "div.close-modal-container a[ng-click='closeModal();']"))
+        )
+        time.sleep(2)
+        botao_fechar_x_final.click()
+        print("Finalizado com sucesso!✅")
+    except:
+        print("ERRO AO FINALIZAR CADASTRO")
 
 
 # CLICA NO BOTÃO DE ATIVO
@@ -223,6 +236,24 @@ def botao_ativacao(driver):
         # Use JavaScript para executar o clique
         driver.execute_script("arguments[0].click();", checkbox_input)
         time.sleep(1)
+
+
+def altera_para_maiusculo(driver):
+    try:
+        check_name = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "personName"))
+        )
+        nome = check_name.get_attribute("value")
+        if any(n.islower() for n in nome):
+            check_name.clear()
+            nome = nome.upper()
+            check_name.send_keys(nome)
+    except:
+        print("ERRO AO ALTERAR O NOME")
+
+
+def limpeza_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def validar_cpf(cpf):
